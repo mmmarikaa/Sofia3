@@ -59,8 +59,8 @@
     <main class="relative z-10 flex-grow flex flex-col w-full h-full p-3 sm:p-4 max-w-lg mx-auto">
         
         <!-- Top Bar (Score & Title) -->
-        <div class="flex items-center justify-between px-4 py-3 rounded-2xl bg-slate-900/60 backdrop-blur-md border border-white/10 mb-3 shadow-lg">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+        <div class="flex items-center justify-between px-4 py-2.5 rounded-2xl bg-slate-900/60 backdrop-blur-md border border-white/10 mb-2.5 shadow-lg">
+            <h2 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
                 <i class="fa-solid fa-gamepad text-purple-400"></i> Mini-Game
             </h2>
             <div class="flex items-center gap-2 text-xs font-medium text-gray-300">
@@ -69,43 +69,43 @@
         </div>
 
         <!-- Fullscreen Game Canvas Container -->
-        <div class="relative flex-grow w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl mb-2">
+        <div class="relative flex-grow w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl mb-1">
             <canvas id="game-canvas"></canvas>
             
             <!-- Game Overlay / Start Screen -->
             <div id="game-overlay" class="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20 transition-opacity">
-                <div class="w-16 h-16 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 mb-4 text-2xl shadow-lg shadow-purple-500/20">
+                <div class="w-14 h-14 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 mb-3 text-xl shadow-lg shadow-purple-500/20">
                     <i class="fa-solid fa-heart animate-pulse"></i>
                 </div>
-                <h3 class="text-xl font-bold text-white mb-2">Pronta?</h3>
-                <p class="text-xs text-gray-300 mb-6 max-w-xs leading-relaxed">Muovi il dito sullo schermo per raccogliere cuori e stelle. Ogni 100 punti... sorpresa con battuta! 😄</p>
-                <button onclick="startGame()" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-sm shadow-xl shadow-purple-500/30 transition transform active:scale-95 cursor-pointer">
+                <h3 class="text-lg font-bold text-white mb-2">Pronta?</h3>
+                <p class="text-xs text-gray-300 mb-5 max-w-xs leading-relaxed">Muovi il dito sullo schermo per raccogliere cuori e stelle. Ogni 150 punti... sorpresa con battuta! 😄</p>
+                <button onclick="startGame()" class="px-7 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-xs shadow-xl shadow-purple-500/30 transition transform active:scale-95 cursor-pointer">
                     Inizia a giocare 🎮
                 </button>
             </div>
 
-            <!-- Joke Popup Overlay (Ogni 100 punti) -->
+            <!-- Joke Popup Overlay (Ogni 150 punti) -->
             <div id="joke-overlay" class="absolute inset-0 bg-black/90 backdrop-blur-lg flex flex-col items-center justify-center p-6 text-center z-30 hidden">
-                <div class="w-14 h-14 rounded-full bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 mb-3 text-xl">
+                <div class="w-12 h-12 rounded-full bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 mb-2.5 text-lg">
                     🎉
                 </div>
-                <span class="text-[11px] font-semibold tracking-wider text-purple-400 uppercase mb-2" id="joke-milestone">150 PUNTI RAGGIUNTI</span>
-                <p id="joke-text" class="text-sm sm:text-base text-white font-medium mb-6 leading-relaxed max-w-xs px-2">
+                <span class="text-[10px] font-semibold tracking-wider text-purple-400 uppercase mb-1.5" id="joke-milestone">150 PUNTI RAGGIUNTI</span>
+                <p id="joke-text" class="text-xs sm:text-sm text-white font-medium mb-5 leading-relaxed max-w-xs px-2">
                     Battuta qui...
                 </p>
-                <button onclick="resumeGame()" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-xs shadow-lg shadow-purple-500/30 transition transform active:scale-95 cursor-pointer">
+                <button onclick="resumeGame()" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-xs shadow-lg shadow-purple-500/30 transition transform active:scale-95 cursor-pointer">
                     Continua a giocare 
                 </button>
             </div>
 
             <!-- Game Over Overlay -->
             <div id="game-over-overlay" class="absolute inset-0 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20 hidden">
-                <div class="w-14 h-14 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-300 mb-3 text-xl">
+                <div class="w-12 h-12 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-300 mb-2.5 text-lg">
                     ⏱️
                 </div>
-                <h3 class="text-xl font-bold text-white mb-1">Tempo scaduto!</h3>
-                <p class="text-xs text-gray-300 mb-6">Hai totalizzato <span id="final-score" class="text-purple-400 font-bold">0</span> punti.</p>
-                <button onclick="startGame()" class="px-7 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-xs shadow-lg shadow-purple-500/30 transition transform active:scale-95 cursor-pointer">
+                <h3 class="text-lg font-bold text-white mb-1">Tempo scaduto!</h3>
+                <p class="text-xs text-gray-300 mb-5">Hai totalizzato <span id="final-score" class="text-purple-400 font-bold">0</span> punti.</p>
+                <button onclick="startGame()" class="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-xs shadow-lg shadow-purple-500/30 transition transform active:scale-95 cursor-pointer">
                     Gioca ancora 
                 </button>
             </div>
@@ -156,13 +156,13 @@
         let gameTime = 30;
         let timerInterval = null;
         let items = [];
-        let nextMilestone = 100;
+        let nextMilestone = 150;
         
         let basket = {
             x: 150,
             y: 0,
-            w: 70,
-            h: 22,
+            w: 65,
+            h: 20,
             speed: 8
         };
 
@@ -211,7 +211,7 @@
             const displayWidth = canvas.width / window.devicePixelRatio;
             const displayHeight = canvas.height / window.devicePixelRatio;
             basket.x = displayWidth / 2 - basket.w / 2;
-            basket.y = displayHeight - 50; // Posizionato in basso nello schermo
+            basket.y = displayHeight - 45;
 
             if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
@@ -230,7 +230,7 @@
 
             const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
             document.getElementById('joke-text').textContent = randomJoke;
-            document.getElementById('joke-milestone').textContent = `${nextMilestone - 100} PUNTI RAGGIUNTI!`;
+            document.getElementById('joke-milestone').textContent = `${nextMilestone} PUNTI RAGGIUNTI!`;
             
             document.getElementById('joke-overlay').classList.remove('hidden');
 
@@ -244,7 +244,7 @@
         function resumeGame() {
             document.getElementById('joke-overlay').classList.add('hidden');
             gameRunning = true;
-            nextMilestone += 100;
+            nextMilestone += 150;
 
             timerInterval = setInterval(() => {
                 gameTime--;
@@ -270,7 +270,7 @@
             items.push({
                 x: Math.random() * (displayWidth - 30),
                 y: -30,
-                size: 26,
+                size: 24,
                 speed: Math.random() * 1.5 + 3,
                 type: type
             });
