@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sofi</title>
+    <!-- Tailwind CSS for modern responsive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #07090e;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        /* Glassmorphism design */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+        }
+        /* Ambient particles */
+        .particle {
+            position: absolute;
+            background: rgba(168, 85, 247, 0.2);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: floatUp 15s linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(105vh) scale(0.5); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+        }
+        /* Game canvas container */
+        #game-canvas {
+            background: linear-gradient(to bottom, #0f172a, #090d16);
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between relative selection:bg-purple-500 selection:text-white">
+
+    <!-- Background Particles -->
+    <div id="particles-container" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
+
+    <!-- Background Ambient Glows -->
+    <div class="absolute top-10 left-1/4 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Main Container -->
+    <main class="relative z-10 flex-grow flex flex-col items-center justify-center px-4 py-8 max-w-lg mx-auto w-full">
+        
+        <!-- Header / Track Card -->
+        <div class="w-full glass-card rounded-3xl p-6 text-center relative overflow-hidden mb-6">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-medium mb-3">
+                <i class="fa-solid fa-headphones"></i> In ascolto ora
+            </div>
+
+            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-1">
+                Danimarca
+            </h1>
+            <p class="text-gray-400 text-sm font-light mb-5">
+                Nayt
+            </p>
+
+            <!-- Hidden YouTube Audio Player Container -->
+            <div id="player-container" class="hidden">
+                <!-- YouTube Iframe for 'Danimarca' audio -->
+                <iframe id="youtube-audio" src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1&autoplay=0&loop=1" allow="autoplay"></iframe>
+            </div>
+
+            <!-- Custom Music Player UI Control -->
+            <div class="flex items-center justify-center gap-4 bg-black/30 border border-white/5 rounded-2xl p-3.5">
+                <button id="play-btn" onclick="toggleMusic()" class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/30 transition transform active:scale-95">
+                    <i id="play-icon" class="fa-solid fa-play text-sm"></i>
+                </button>
+                <div class="text-left">
+                    <p id="music-status" class="text-xs font-medium text-white">Riproduci la canzone</p>
+                    <p class="text-[11px] text-gray-400">Atmosfera sottofondo</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mini-Game Section: Catching Hearts & Stars -->
+        <div class="w-full glass-card rounded-3xl p-5 sm:p-6 text-center relative overflow-hidden">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-purple-400"></i> Mini-Game
+                </h2>
+                <div class="flex items-center gap-3 text-xs font-medium text-gray-300">
+                    <span class="bg-white/5 px-2.5 py-1 rounded-full border border-white/5">Punti: <span id="score-val" class="text-purple-400 font-bold">0</span></span>
+                </div>
+            </div>
+            
+            <p class="text-gray-400 text-xs mb-4 text-left">
+                Muovi il cestino in basso trascinandolo o toccando lo schermo per raccogliere cuori e stelle!
+            </p>
+
+            <!-- Interactive Game Canvas Container -->
+            <div class="relative w-full rounded-2xl overflow-hidden border border-white/10 shadow-inner">
+                <canvas id="game-canvas" class="w-full h-72 block"></canvas>
+                
+                <!-- Game Overlay / Start Screen -->
+                <div id="game-overlay" class="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20 transition-opacity">
+                    <div class="w-14 h-14 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 mb-3 text-xl">
+                        <i class="fa-solid fa-heart animate-pulse"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-1">Prendi il volo</h3>
+                    <p class="text-xs text-gray-300 mb-5 max-w-xs">Raccogli più cuori che puoi prima che scada il tempo!</p>
+                    <button onclick="startGame()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium text-xs shadow-lg shadow-purple-500/30 transition transform active:scale-95">
+                        Inizia Gioco
+                    </button>
+                </div>
+
+                <!-- Game Over Overlay -->
+                <div id="game-over-overlay" class="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20 hidden">
+                    <h3 class="text-xl font-bold text-white mb-1">Fine Partita!</h3>
+                    <p class="text-xs text-gray-300 mb-4">Hai totalizzato <span id="final-score" class="text-purple-400 font-bold">0</span> punti.</p>
+                    <button onclick="startGame()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium text-xs shadow-lg shadow-purple-500/30 transition transform active:scale-95">
+                        Gioca ancora
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 py-5 text-center text-xs text-gray-600">
+        Creato con stile per te
+    </footer>
+
+    <!-- JavaScript Game & Music Logic -->
+    <script>
+        // Background Particles Generator
+        const particlesContainer = document.getElementById('particles-container');
+        for (let i = 0; i < 15; i++) {
+            const p = document.createElement('div');
+            p.classList.add('particle');
+            const size = Math.random() * 5 + 3;
+            p.style.width = `${size}px`;
+            p.style.height = `${size}px`;
+            p.style.left = `${Math.random() * 100}vw`;
+            p.style.top = `${Math.random() * 100}vh`;
+            p.style.animationDuration = `${Math.random() * 10 + 10}s`;
+            p.style.animationDelay = `${Math.random() * 5}s`;
+            particlesContainer.appendChild(p);
+        }
+
+        // Music Play/Pause Toggle Simulation
+        let isPlaying = false;
+        function toggleMusic() {
+            const icon = document.getElementById('play-icon');
+            const status = document.getElementById('music-status');
+            const iframe = document.getElementById('youtube-audio');
+            
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                icon.classList.remove('fa-play');
+                icon.classList.add('fa-pause');
+                status.textContent = "Riproduzione in corso...";
+                iframe.src = "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1&autoplay=1&loop=1";
+            } else {
+                icon.classList.remove('fa-pause');
+                icon.classList.add('fa-play');
+                status.textContent = "Riproduci la canzone";
+                iframe.src = "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1&autoplay=0&loop=1";
+            }
+        }
+
+        // Mini-Game Engine (Canvas Catching Hearts)
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let gameRunning = false;
+        let score = 0;
+        let gameTime = 30;
+        let timerInterval = null;
+        let items = [];
+        
+        let basket = {
+            x: 150,
+            y: 240,
+            w: 60,
+            h: 20,
+            speed: 8
+        };
+
+        let keys = { ArrowLeft: false, ArrowRight: false };
+
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') keys.ArrowLeft = true;
+            if (e.key === 'ArrowRight') keys.ArrowRight = true;
+        });
+        window.addEventListener('keyup', e => {
+            if (e.key === 'ArrowLeft') keys.ArrowLeft = false;
+            if (e.key === 'ArrowRight') keys.ArrowRight = false;
+        });
+
+        let isDragging = false;
+        canvas.addEventListener('pointerdown', e => {
+            isDragging = true;
+            updateBasketPosition(e);
+        });
+        canvas.addEventListener('pointermove', e => {
+            if (isDragging) updateBasketPosition(e);
+        });
+        window.addEventListener('pointerup', () => { isDragging = false; });
+
+        function updateBasketPosition(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.clientX - rect.left;
+            basket.x = clientX - basket.w / 2;
+            const displayWidth = canvas.width / window.devicePixelRatio;
+            if (basket.x < 0) basket.x = 0;
+            if (basket.x > displayWidth - basket.w) basket.x = displayWidth - basket.w;
+        }
+
+        function startGame() {
+            document.getElementById('game-overlay').classList.add('hidden');
+            document.getElementById('game-over-overlay').classList.add('hidden');
+            score = 0;
+            gameTime = 30;
+            document.getElementById('score-val').textContent = score;
+            items = [];
+            gameRunning = true;
+
+            const displayWidth = canvas.width / window.devicePixelRatio;
+            basket.x = displayWidth / 2 - basket.w / 2;
+
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                gameTime--;
+                if (gameTime <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function endGame() {
+            gameRunning = false;
+            clearInterval(timerInterval);
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('game-over-overlay').classList.remove('hidden');
+        }
+
+        function spawnItem() {
+            const displayWidth = canvas.width / window.devicePixelRatio;
+            const types = ['heart', 'star'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            items.push({
+                x: Math.random() * (displayWidth - 30),
+                y: -30,
+                size: 24,
+                speed: Math.random() * 1.5 + 2,
+                type: type
+            });
+        }
+
+        let spawnTimer = 0;
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            const displayWidth = canvas.width / window.devicePixelRatio;
+            const displayHeight = canvas.height / window.devicePixelRatio;
+
+            ctx.clearRect(0, 0, displayWidth, displayHeight);
+
+            if (keys.ArrowLeft) basket.x -= basket.speed;
+            if (keys.ArrowRight) basket.x += basket.speed;
+            if (basket.x < 0) basket.x = 0;
+            if (basket.x > displayWidth - basket.w) basket.x = displayWidth - basket.w;
+
+            spawnTimer++;
+            if (spawnTimer > 35) {
+                spawnItem();
+                spawnTimer = 0;
+            }
+
+            for (let i = items.length - 1; i >= 0; i--) {
+                let itm = items[i];
+                itm.y += itm.speed;
+
+                ctx.font = `${itm.size}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(itm.type === 'heart' ? '💖' : '⭐', itm.x + itm.size/2, itm.y + itm.size/2);
+
+                if (
+                    itm.y + itm.size >= basket.y &&
+                    itm.y <= basket.y + basket.h &&
+                    itm.x + itm.size >= basket.x &&
+                    itm.x <= basket.x + basket.w
+                ) {
+                    score += (itm.type === 'heart' ? 10 : 15);
+                    document.getElementById('score-val').textContent = score;
+                    items.splice(i, 1);
+                    continue;
+                }
+
+                if (itm.y > displayHeight) {
+                    items.splice(i, 1);
+                }
+            }
+
+            ctx.fillStyle = '#a855f7';
+            ctx.shadowColor = '#a855f7';
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.roundRect(basket.x, basket.y, basket.w, basket.h, [8]);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>
