@@ -2,31 +2,28 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sofi</title>
-    <!-- Tailwind CSS for modern responsive design -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Per Te ✨</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome for icons -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #07090e;
             color: #f3f4f6;
-            overflow-x: hidden;
+            overflow: hidden; /* Blocca lo scroll della pagina per un effetto fullscreen */
             touch-action: manipulation;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            height: 100dvh;
         }
-        /* Glassmorphism design */
-        .glass-card {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
-        }
-        /* Ambient particles */
         .particle {
             position: absolute;
             background: rgba(168, 85, 247, 0.2);
@@ -40,14 +37,16 @@
             80% { opacity: 0.6; }
             100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
         }
-        /* Game canvas container */
         #game-canvas {
             background: linear-gradient(to bottom, #0f172a, #090d16);
             touch-action: none;
+            width: 100%;
+            height: 100%;
+            display: block;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between relative selection:bg-purple-500 selection:text-white">
+<body class="h-screen w-screen flex flex-col justify-between relative selection:bg-purple-500 selection:text-white">
 
     <!-- Background Particles -->
     <div id="particles-container" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
@@ -56,94 +55,77 @@
     <div class="absolute top-10 left-1/4 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- Main Container -->
-    <main class="relative z-10 flex-grow flex flex-col items-center justify-center px-4 py-8 max-w-lg mx-auto w-full">
+    <!-- Main Fullscreen Container -->
+    <main class="relative z-10 flex-grow flex flex-col w-full h-full p-3 sm:p-4 max-w-lg mx-auto">
         
-        <!-- Header / Track Card -->
-        <div class="w-full glass-card rounded-3xl p-6 text-center relative overflow-hidden mb-6">
-            <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-xs font-medium mb-3">
-                <i class="fa-solid fa-headphones"></i> In ascolto ora
-            </div>
-
-            <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-1">
-                Danimarca
-            </h1>
-            <p class="text-gray-400 text-sm font-light mb-5">
-                Nayt
-            </p>
-
-            <!-- Hidden YouTube Audio Player Container -->
-            <div id="player-container" class="hidden">
-                <!-- YouTube Iframe for 'Danimarca' audio -->
-                <iframe id="youtube-audio" src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1&autoplay=0&loop=1" allow="autoplay"></iframe>
-            </div>
-
-            <!-- Custom Music Player UI Control -->
-            <div class="flex items-center justify-center gap-4 bg-black/30 border border-white/5 rounded-2xl p-3.5">
-                <button id="play-btn" onclick="toggleMusic()" class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-purple-500/30 transition transform active:scale-95">
-                    <i id="play-icon" class="fa-solid fa-play text-sm"></i>
-                </button>
-                <div class="text-left">
-                    <p id="music-status" class="text-xs font-medium text-white">Riproduci la canzone</p>
-                    <p class="text-[11px] text-gray-400">Atmosfera sottofondo</p>
-                </div>
+        <!-- Top Bar (Score & Title) -->
+        <div class="flex items-center justify-between px-4 py-3 rounded-2xl bg-slate-900/60 backdrop-blur-md border border-white/10 mb-3 shadow-lg">
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-purple-400"></i> Mini-Game
+            </h2>
+            <div class="flex items-center gap-2 text-xs font-medium text-gray-300">
+                <span class="bg-white/5 px-3 py-1 rounded-full border border-white/5">Punti: <span id="score-val" class="text-purple-400 font-bold">0</span></span>
             </div>
         </div>
 
-        <!-- Mini-Game Section: Catching Hearts & Stars -->
-        <div class="w-full glass-card rounded-3xl p-5 sm:p-6 text-center relative overflow-hidden">
-            <div class="flex items-center justify-between mb-3">
-                <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-gamepad text-purple-400"></i> Mini-Game
-                </h2>
-                <div class="flex items-center gap-3 text-xs font-medium text-gray-300">
-                    <span class="bg-white/5 px-2.5 py-1 rounded-full border border-white/5">Punti: <span id="score-val" class="text-purple-400 font-bold">0</span></span>
-                </div>
-            </div>
+        <!-- Fullscreen Game Canvas Container -->
+        <div class="relative flex-grow w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl mb-2">
+            <canvas id="game-canvas"></canvas>
             
-            <p class="text-gray-400 text-xs mb-4 text-left">
-                Muovi il cestino in basso trascinandolo o toccando lo schermo per raccogliere cuori e stelle!
-            </p>
-
-            <!-- Interactive Game Canvas Container -->
-            <div class="relative w-full rounded-2xl overflow-hidden border border-white/10 shadow-inner">
-                <canvas id="game-canvas" class="w-full h-72 block"></canvas>
-                
-                <!-- Game Overlay / Start Screen -->
-                <div id="game-overlay" class="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20 transition-opacity">
-                    <div class="w-14 h-14 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 mb-3 text-xl">
-                        <i class="fa-solid fa-heart animate-pulse"></i>
-                    </div>
-                    <h3 class="text-lg font-bold text-white mb-1">Prendi il volo</h3>
-                    <p class="text-xs text-gray-300 mb-5 max-w-xs">Raccogli più cuori che puoi prima che scada il tempo!</p>
-                    <button onclick="startGame()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium text-xs shadow-lg shadow-purple-500/30 transition transform active:scale-95">
-                        Inizia Gioco
-                    </button>
+            <!-- Game Overlay / Start Screen -->
+            <div id="game-overlay" class="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20 transition-opacity">
+                <div class="w-16 h-16 rounded-full bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 mb-4 text-2xl shadow-lg shadow-purple-500/20">
+                    <i class="fa-solid fa-heart animate-pulse"></i>
                 </div>
+                <h3 class="text-xl font-bold text-white mb-2">Pronta?</h3>
+                <p class="text-xs text-gray-300 mb-6 max-w-xs leading-relaxed">Muovi il dito sullo schermo per raccogliere cuori e stelle. Ogni 100 punti... sorpresa con battuta! 😄</p>
+                <button onclick="startGame()" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-sm shadow-xl shadow-purple-500/30 transition transform active:scale-95 cursor-pointer">
+                    Inizia a giocare 🎮
+                </button>
+            </div>
 
-                <!-- Game Over Overlay -->
-                <div id="game-over-overlay" class="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20 hidden">
-                    <h3 class="text-xl font-bold text-white mb-1">Fine Partita!</h3>
-                    <p class="text-xs text-gray-300 mb-4">Hai totalizzato <span id="final-score" class="text-purple-400 font-bold">0</span> punti.</p>
-                    <button onclick="startGame()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium text-xs shadow-lg shadow-purple-500/30 transition transform active:scale-95">
-                        Gioca ancora
-                    </button>
+            <!-- Joke Popup Overlay (Ogni 100 punti) -->
+            <div id="joke-overlay" class="absolute inset-0 bg-black/90 backdrop-blur-lg flex flex-col items-center justify-center p-6 text-center z-30 hidden">
+                <div class="w-14 h-14 rounded-full bg-purple-500/20 border border-purple-400/40 flex items-center justify-center text-purple-300 mb-3 text-xl">
+                    🎉
                 </div>
+                <span class="text-[11px] font-semibold tracking-wider text-purple-400 uppercase mb-2" id="joke-milestone">100 PUNTI RAGGIUNTI</span>
+                <p id="joke-text" class="text-sm sm:text-base text-white font-medium mb-6 leading-relaxed max-w-xs px-2">
+                    Battuta qui...
+                </p>
+                <button onclick="resumeGame()" class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-xs shadow-lg shadow-purple-500/30 transition transform active:scale-95 cursor-pointer">
+                    Continua a giocare 🚀
+                </button>
+            </div>
+
+            <!-- Game Over Overlay -->
+            <div id="game-over-overlay" class="absolute inset-0 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20 hidden">
+                <div class="w-14 h-14 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-300 mb-3 text-xl">
+                    ⏱️
+                </div>
+                <h3 class="text-xl font-bold text-white mb-1">Tempo scaduto!</h3>
+                <p class="text-xs text-gray-300 mb-6">Hai totalizzato <span id="final-score" class="text-purple-400 font-bold">0</span> punti.</p>
+                <button onclick="startGame()" class="px-7 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold text-xs shadow-lg shadow-purple-500/30 transition transform active:scale-95 cursor-pointer">
+                    Gioca ancora 🔄
+                </button>
             </div>
         </div>
 
     </main>
 
-    <!-- Footer -->
-    <footer class="relative z-10 py-5 text-center text-xs text-gray-600">
-        Creato con stile per te
-    </footer>
-
-    <!-- JavaScript Game & Music Logic -->
+    <!-- JavaScript Game Logic -->
     <script>
-        // Background Particles Generator
+        const jokes = [
+            "Sai qual è la differenza tra un gatto e una virgola? Il gatto ha gli artigli sulla coda, la virgola ha la coda in mezzo alla frase... ok, questa era pessima, continua a giocare! 🐱",
+            "Perché i programmatori preferiscono la natura? Perché lì ci sono meno bug! 💻🌳",
+            "Se la vita ti dà limoni... chiedi anche del tequila e del sale! 🍋",
+            "Qual è il colmo per un elettricista? Avere una vita scioccante! ⚡",
+            "Sai perché gli uccelli volano a sud in inverno? Perché camminare sarebbe troppo lungo! 🐦"
+        ];
+
+        // Particles
         const particlesContainer = document.getElementById('particles-container');
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 12; i++) {
             const p = document.createElement('div');
             p.classList.add('particle');
             const size = Math.random() * 5 + 3;
@@ -156,28 +138,7 @@
             particlesContainer.appendChild(p);
         }
 
-        // Music Play/Pause Toggle Simulation
-        let isPlaying = false;
-        function toggleMusic() {
-            const icon = document.getElementById('play-icon');
-            const status = document.getElementById('music-status');
-            const iframe = document.getElementById('youtube-audio');
-            
-            isPlaying = !isPlaying;
-            if (isPlaying) {
-                icon.classList.remove('fa-play');
-                icon.classList.add('fa-pause');
-                status.textContent = "Riproduzione in corso...";
-                iframe.src = "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1&autoplay=1&loop=1";
-            } else {
-                icon.classList.remove('fa-pause');
-                icon.classList.add('fa-play');
-                status.textContent = "Riproduci la canzone";
-                iframe.src = "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1&autoplay=0&loop=1";
-            }
-        }
-
-        // Mini-Game Engine (Canvas Catching Hearts)
+        // Fullscreen Mini-Game Engine
         const canvas = document.getElementById('game-canvas');
         const ctx = canvas.getContext('2d');
         
@@ -195,12 +156,13 @@
         let gameTime = 30;
         let timerInterval = null;
         let items = [];
+        let nextMilestone = 100;
         
         let basket = {
             x: 150,
-            y: 240,
-            w: 60,
-            h: 20,
+            y: 0,
+            w: 70,
+            h: 22,
             speed: 8
         };
 
@@ -237,16 +199,53 @@
         function startGame() {
             document.getElementById('game-overlay').classList.add('hidden');
             document.getElementById('game-over-overlay').classList.add('hidden');
+            document.getElementById('joke-overlay').classList.add('hidden');
+            
             score = 0;
             gameTime = 30;
+            nextMilestone = 100;
             document.getElementById('score-val').textContent = score;
             items = [];
             gameRunning = true;
 
             const displayWidth = canvas.width / window.devicePixelRatio;
+            const displayHeight = canvas.height / window.devicePixelRatio;
             basket.x = displayWidth / 2 - basket.w / 2;
+            basket.y = displayHeight - 50; // Posizionato in basso nello schermo
 
             if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                gameTime--;
+                if (gameTime <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function triggerJokePopup() {
+            gameRunning = false;
+            clearInterval(timerInterval);
+
+            const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
+            document.getElementById('joke-text').textContent = randomJoke;
+            document.getElementById('joke-milestone').textContent = `${nextMilestone - 100} PUNTI RAGGIUNTI!`;
+            
+            document.getElementById('joke-overlay').classList.remove('hidden');
+
+            confetti({
+                particleCount: 100,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function resumeGame() {
+            document.getElementById('joke-overlay').classList.add('hidden');
+            gameRunning = true;
+            nextMilestone += 100;
+
             timerInterval = setInterval(() => {
                 gameTime--;
                 if (gameTime <= 0) {
@@ -271,8 +270,8 @@
             items.push({
                 x: Math.random() * (displayWidth - 30),
                 y: -30,
-                size: 24,
-                speed: Math.random() * 1.5 + 2,
+                size: 26,
+                speed: Math.random() * 1.5 + 3,
                 type: type
             });
         }
@@ -292,7 +291,7 @@
             if (basket.x > displayWidth - basket.w) basket.x = displayWidth - basket.w;
 
             spawnTimer++;
-            if (spawnTimer > 35) {
+            if (spawnTimer > 25) {
                 spawnItem();
                 spawnTimer = 0;
             }
@@ -315,6 +314,11 @@
                     score += (itm.type === 'heart' ? 10 : 15);
                     document.getElementById('score-val').textContent = score;
                     items.splice(i, 1);
+                    
+                    if (score >= nextMilestone) {
+                        triggerJokePopup();
+                        return;
+                    }
                     continue;
                 }
 
@@ -325,9 +329,9 @@
 
             ctx.fillStyle = '#a855f7';
             ctx.shadowColor = '#a855f7';
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 12;
             ctx.beginPath();
-            ctx.roundRect(basket.x, basket.y, basket.w, basket.h, [8]);
+            ctx.roundRect(basket.x, basket.y, basket.w, basket.h, [10]);
             ctx.fill();
             ctx.shadowBlur = 0;
 
